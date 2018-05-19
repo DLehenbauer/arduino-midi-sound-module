@@ -13,8 +13,8 @@
 #endif
 
 #include <stdint.h>
-#include "drivers/midi.h"
-#include "drivers/ssd1306.h"
+#include "midi.h"
+#include "ssd1306.h"
 #include "midisynth.h"
 
 Ssd1306</* rotate 180: */ true> display;    // SSD1306 driver for 128x64 OLED SPI display

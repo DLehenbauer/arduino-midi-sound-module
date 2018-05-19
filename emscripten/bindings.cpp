@@ -1,6 +1,6 @@
 /*    Embind declarations used to expose synth functionality to JavaScript when compiling with Emscripten:    https://kripken.github.io/emscripten-site/docs/porting/connecting_cpp_and_javascript/embind.html#embind        (Only used by private testing and tools.)*/#include <emscripten/bind.h>
 #define DAC Ltc16xx<PinId::D10>
-#include "../envelope.h"#include "../synth.h"#include "../drivers/midi.h"#include "../midisynth.h"#include "../instruments.h"using namespace emscripten;
+#include "../envelope.h"#include "../synth.h"#include "../midi.h"#include "../midisynth.h"#include "../instruments.h"using namespace emscripten;
 MidiSynth synth;
 
 void noteOn(uint8_t channel, uint8_t note, uint8_t velocity)		    { synth.midiNoteOn(channel, note, velocity); }

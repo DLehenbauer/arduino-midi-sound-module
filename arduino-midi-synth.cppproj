@@ -205,33 +205,6 @@
     <None Include="emscripten\bindings.cpp">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="drivers\dac\ltc16xx.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\dac\pwm0.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\dac\pwm01.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\dac\pwm1.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\midi.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\pin.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\ringbuffer.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\spi.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="drivers\ssd1306.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="emscripten\util\delay.h">
       <SubType>compile</SubType>
     </Compile>
@@ -241,13 +214,40 @@
     <Compile Include="envelope.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="ltc16xx.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="midi.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="midisynth.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="pin.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="pwm0.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="pwm01.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="pwm1.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ringbuffer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ssd1306.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="synth.h">
@@ -260,8 +260,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="drivers\" />
-    <Folder Include="drivers\dac\" />
     <Folder Include="emscripten" />
     <Folder Include="emscripten\avr" />
     <Folder Include="emscripten\util" />

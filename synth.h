@@ -30,10 +30,10 @@
 #include <stdint.h>
 #include "instruments.h"
 #include "envelope.h"
-#include "drivers/dac/ltc16xx.h"
-#include "drivers/dac/pwm0.h"
-#include "drivers/dac/pwm01.h"
-#include "drivers/dac/pwm1.h"
+#include "ltc16xx.h"
+#include "pwm0.h"
+#include "pwm01.h"
+#include "pwm1.h"
 
 // With GCC, we can calculate the _noteToPitch table at compile time.
 #ifndef __EMSCRIPTEN__

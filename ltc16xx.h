@@ -44,7 +44,7 @@
 #ifndef LTC16XX_H_
 #define LTC16XX_H_
 
-#include "../spi.h"
+#include "spi.h"
 
 template<PinId csPin>
 class Ltc16xx final {
