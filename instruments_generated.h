@@ -1,6 +1,6 @@
 /*
     Instruments programs and wavetable
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
 static constexpr EnvelopeStage EnvelopeStages[] PROGMEM = {

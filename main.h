@@ -1,6 +1,6 @@
 /*
     Main 'setup()' & 'loop()' definitions, shared with main.cpp and *.ino
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
 #ifndef MAIN_H_

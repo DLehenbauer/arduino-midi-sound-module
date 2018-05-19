@@ -1,6 +1,6 @@
 /*
     Templated digital I/O pin driver
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
 #ifndef PINS_H_

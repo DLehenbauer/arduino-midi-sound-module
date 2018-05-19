@@ -1,6 +1,6 @@
 /*
     Driver for Ltc16xx serial DAC
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     DANGER: This driver does not wait for the SPI end-of-transmission flag before selecting the slave
             device or transmitting.  The caller is responsible for ensuring that:

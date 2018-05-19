@@ -1,6 +1,6 @@
 /*
     Arduino Midi Synth (Core Engine)
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Optimized for ATMega328P @ 16mhz w/AVR8/GNU C Compiler : 5.4.0 (-Os):
       - 16 voices sampled & mixed in real-time at ~20kHz

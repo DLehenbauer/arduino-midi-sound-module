@@ -1,6 +1,6 @@
 /*
     Driver for 16-bit PWM on Timers 0 and 1 with phase cancellation at 62.5khz
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Connection to Arduino Uno:
     

@@ -1,6 +1,6 @@
 /*
     Arduino Midi Synth v0.1
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
     
     This sketch turns an Arduino Uno into a 16-voice wavetable synthesizer functioning as a
     MIDI sound module.  Typical usages include generating sound for a MIDI keyboard controller

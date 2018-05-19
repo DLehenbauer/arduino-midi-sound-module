@@ -1,6 +1,6 @@
 /*
     MidiSynth
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Extends Synth with methods and required state for processing MIDI messages.
 */

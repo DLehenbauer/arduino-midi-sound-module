@@ -1,6 +1,6 @@
 /*
     Envelope Generator
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
     
     Envelope generator used for amplitude, frequency, and wavetable offset modulation.
 */

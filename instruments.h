@@ -1,6 +1,6 @@
 /*
     Instrument type definitions
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
 #ifndef __INSTRUMENT_H__

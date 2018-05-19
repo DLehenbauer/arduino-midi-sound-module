@@ -1,6 +1,6 @@
 /*
     Special purpose SPI driver
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
 #ifndef SPI_H_

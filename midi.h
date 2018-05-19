@@ -1,6 +1,6 @@
 /*
     Serial driver & MIDI decoder
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Receives, decodes, and dispatches MIDI data arriving via the Arduino Uno's serial USART.
     

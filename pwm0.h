@@ -1,6 +1,6 @@
 /*
     Driver for 16-bit PWM on Timer 0
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Connection to Arduino Uno:
     

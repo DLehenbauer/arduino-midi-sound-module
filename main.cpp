@@ -1,6 +1,6 @@
 ﻿/*
     Main loop when compiling with Atmel Studio
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
 /*

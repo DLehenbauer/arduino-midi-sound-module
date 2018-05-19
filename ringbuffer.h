@@ -1,6 +1,6 @@
 /*
     Ring Buffer
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Simple circular buffer used by 'midi.h' to quickly save incoming MIDI bytes during the
     USART RX ISR for later decoding and dispatch.

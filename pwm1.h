@@ -1,6 +1,6 @@
 /*
     Driver for 16-bit PWM on Timer 1
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Note: Prefer Timer 0 for PWM output, as it requires fewer ops to update it's output.
 

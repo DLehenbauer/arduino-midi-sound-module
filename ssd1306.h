@@ -1,6 +1,6 @@
 /*
     SSD1306 display driver
-    https://github.com/dlehenbauer/arduino-midi-synth
+    https://github.com/DLehenbauer/arduino-midi-sound-module
 
     A specialized driver for SSD1306-based OLED display, used to concurrently update the real-time bar
     from the main 'loop()' in tiny slices, interleaved with dispatching MIDI messages.
