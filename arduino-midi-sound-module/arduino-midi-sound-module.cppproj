@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>arduino-gm-synth</AssemblyName>
-    <Name>arduino-gm-synth</Name>
-    <RootNamespace>arduino-gm-synth</RootNamespace>
+    <AssemblyName>arduino-midi-sound-module</AssemblyName>
+    <Name>arduino-midi-sound-module</Name>
+    <RootNamespace>arduino-midi-sound-module</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>

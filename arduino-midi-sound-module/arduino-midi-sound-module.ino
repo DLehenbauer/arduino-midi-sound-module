@@ -14,7 +14,7 @@
       - Key velocity
       - Pitch bend
      
-    (See open GitHub issues for caveats: https://github.com/dlehenbauer/arduino-midi-synth/issues)
+    (See open GitHub issues for caveats: https://github.com/dlehenbauer/arduino-midi-sound-module/issues)
       
     The synth engine features:
       - 16 voices sampled & mixed in real-time at ~20kHz

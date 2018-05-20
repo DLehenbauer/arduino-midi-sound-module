@@ -1,4 +1,4 @@
-:: Compile the Arduino-Midi-Synth firmware to JavaScript (via Emscripten) for private testing and tools.
+:: Compile the Arduino MIDI Sound Module firmware to JavaScript (via Emscripten) for private testing and tools.
 
 setlocal
 
