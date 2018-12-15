@@ -30,21 +30,13 @@
 #include <stdint.h>
 #include "instruments.h"
 #include "envelope.h"
-#include "ltc16xx.h"
-#include "pwm0.h"
-#include "pwm01.h"
-#include "pwm1.h"
+#include "dac.h"
 
 // With GCC, we can calculate the _noteToPitch table at compile time.
 #ifndef __EMSCRIPTEN__
 constexpr static uint16_t interval(double sampleRate, double note) {
   return round(pow(2, (note - 69.0) / 12.0) * 440.0 / sampleRate * static_cast<double>(0xFFFF));
 }
-#endif
-
-// If unspecified, choose the default DAC.
-#ifndef DAC
-  #define DAC Pwm0
 #endif
 
 class Synth {
@@ -120,7 +112,7 @@ class Synth {
   
   public:
     void begin(){
-      DAC::setup();
+      Dac::setup();
 
       // Setup Timer2 for sample/mix/output ISR.
       TCCR2A = _BV(WGM21);                // CTC Mode (Clears timer and raises interrupt when OCR2B reaches OCR2A)
@@ -302,10 +294,6 @@ class Synth {
         }
       }
 
-      // If using an SPI DAC, we transmit the sample computed in the previous ISR concurrently
-      // with calculating the next sample.
-      DAC::sendHiByte();										                              // Begin transmitting upper 8-bits to DAC.
-
       // Macro that advances 'v_phase[voice]' by the sampling interval 'v_interval[voice]' and
       // stores the next 8-bit sample offset as 'offset##voice'.
       #define PHASE(voice) uint8_t offset##voice = ((v_phase[voice] += v_interval[voice]) >> 8)
@@ -325,10 +313,9 @@ class Synth {
       SAMPLE(0); SAMPLE(1); SAMPLE(2); SAMPLE(3);                         // Sample the wavetable at the offsets calculated above.
       SAMPLE(4); SAMPLE(5); SAMPLE(6); SAMPLE(7);                         // (Samples should stay in register.)
     
-      int16_t mix = (MIX(0) + MIX(1) + MIX(2) + MIX(3)) >> 1;             // Apply xor, modulate by amp, and mix.
-      mix += (MIX(4) + MIX(5) + MIX(6) + MIX(7)) >> 1;
-
-      DAC::sendLoByte();													                        // First byte should be done, begin transmitting the lower 8-bits.
+      int16_t mix0to7 = (MIX(0) + MIX(1) + MIX(2) + MIX(3));             // Apply xor, modulate by amp, and mix.
+      mix0to7 += (MIX(4) + MIX(5) + MIX(6) + MIX(7));
+      Dac::set0to7(mix0to7);
 
       PHASE(8); PHASE(9); PHASE(10); PHASE(11);                           // Advance the Q8.8 phase and calculate the 8-bit offsets into the wavetable.
       PHASE(12); PHASE(13); PHASE(14); PHASE(15);                         // (Load stores should use constant offsets and results should stay in register.)
@@ -336,20 +323,17 @@ class Synth {
       SAMPLE(8); SAMPLE(9); SAMPLE(10); SAMPLE(11);                       // Sample the wavetable at the offsets calculated above.
       SAMPLE(12); SAMPLE(13); SAMPLE(14); SAMPLE(15);                     // (Samples should stay in register.)
     
-      mix += (MIX(8) + MIX(9) + MIX(10) + MIX(11)) >> 1;                  // Apply xor, modulate by amp, and mix.
-      mix += (MIX(12) + MIX(13) + MIX(14) + MIX(15)) >> 1;
+      int16_t mix8toF = (MIX(8) + MIX(9) + MIX(10) + MIX(11));                  // Apply xor, modulate by amp, and mix.
+      mix8toF += (MIX(12) + MIX(13) + MIX(14) + MIX(15));
+      Dac::set8toF(mix8toF);
 
       #undef MIX
       #undef SAMPLE
       #undef PHASE
     
-      const uint16_t wavOut = mix + 0x8000;
-      DAC::set(wavOut);													                          // Store resulting wave output for transmission on next interrupt.
-                                                                          // (If using SPI, also deselects DAC and clears EOT bit.)
-    
       TIMSK2 = _BV(OCIE2A);                                               // Restore timer2 interrupts.
     
-      return wavOut;
+      return (mix0to7 >> 1) + (mix8toF >> 1) + 0x8000;
     }
 
   
