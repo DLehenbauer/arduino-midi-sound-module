@@ -6,7 +6,7 @@
       - 16 voices sampled & mixed in real-time at ~20kHz
       - Wavetable and white noise sources
       - Amplitude, frequency, and wavetable offset modulated by envelope generators
-      - Additional volume control per voice (matching MIDI velocity)
+      - Additional volume control per voice (MIDI velocity and channel volume)
 
     Sample, mixing, and output occurs on the Timer 2 ISR.  (Timer 2 was chosen because
     it's PWM output pins conflict with SPI, making it ill suited for PWM output for this
@@ -15,7 +15,7 @@
     Notes:
       - The sample/mix ISR is carefully arranged to minimize spilling registers to memory.
       
-      - To avoid missing arriving MIDI messages, the Timer2 ISR reenables interrupts so
+      - To avoid missing arriving MIDI messages, the Timer2 ISR re-enables interrupts so
         that it can be preempted by the USART RX ISR.
         
         (However, it disables Timer2 ISRs until it's ready to exit to avoid reentrancy.)
@@ -103,7 +103,7 @@ class Synth {
     static volatile Envelope			v_freqMod[Synth::numVoices];		  // Frequency modulation (-64 .. +64)
     static volatile Envelope			v_waveMod[Synth::numVoices];		  // Wave offset modulation (0 .. 127)
 
-    static volatile uint8_t			  v_vol[Synth::numVoices];			    // Additional 7-bit volume scalar (i.e., MIDI velocity).
+    static volatile uint8_t			  v_vol[Synth::numVoices];			    // 7-bit volume scalar (0 .. 127)
 
     static          uint16_t		  _baseInterval[Synth::numVoices];  // Original Q8.8 sampling internal, prior to modulation, pitch bend, etc.
     static volatile uint16_t		  v_bentInterval[Synth::numVoices];	// Q8.8 sampling internal post pitch bend, but prior to freqMod.
@@ -162,11 +162,13 @@ class Synth {
       return current;
     }
 
-    void noteOn(uint8_t voice, uint8_t note, uint8_t velocity, const Instrument& instrument) {
+    // Note that MidiSynth preprocesses both note velocity and channel volume into the single
+    // volume scalar.
+    void noteOn(uint8_t voice, uint8_t note, uint8_t volume, const Instrument& instrument) {
       const uint8_t flags = instrument.flags;
       
       if (flags & InstrumentFlags_HalfAmplitude) {                  // If the half-amplitude flag is set, play at 1/2 volume.  (Allows some
-        velocity >>= 1;                                             // reuse of amplitude envelopes for softer instruments, like hi-hats.)
+        volume >>= 1;                                               // reuse of amplitude envelopes for softer instruments, like hi-hats.)
       }
     
       bool isNoise = flags & InstrumentFlags_Noise;                 // If true, the ISR will periodically overwrite 'v_xor[]' with a random
@@ -193,7 +195,7 @@ class Synth {
       v_xor[voice] = instrument.xorBits;
       v_amp[voice] = 0;
       v_isNoise[voice] = isNoise;
-      v_vol[voice] = velocity;
+      v_vol[voice] = volume;
       v_ampMod[voice].start(instrument.ampMod + ampOffset);
       v_freqMod[voice].start(instrument.freqMod);
       v_waveMod[voice].start(instrument.waveMod);
@@ -205,6 +207,15 @@ class Synth {
       suspend();                                                    // Suspend audio processing before updating state shared with the ISR.
       v_ampMod[voice].stop();                                       // Move amplitude envelope to 'release' stage, if not there already.
       resume();                                                     // Resume audio processing.
+    }
+
+    // Update the current volume for the given voice.  Note that MidiSynth preprocesses both note velocity
+    // and channel volume into the single volume scalar.
+    void setVolume(uint8_t voice, uint8_t volume) {
+      // Suspend audio processing before updating state shared with the ISR.
+      suspend();
+      v_vol[voice] = volume;
+      resume();
     }
   
     void pitchBend(uint8_t voice, int16_t value) {
@@ -313,7 +324,7 @@ class Synth {
       SAMPLE(0); SAMPLE(1); SAMPLE(2); SAMPLE(3);                         // Sample the wavetable at the offsets calculated above.
       SAMPLE(4); SAMPLE(5); SAMPLE(6); SAMPLE(7);                         // (Samples should stay in register.)
     
-      int16_t mix0to7 = (MIX(0) + MIX(1) + MIX(2) + MIX(3));             // Apply xor, modulate by amp, and mix.
+      int16_t mix0to7 = (MIX(0) + MIX(1) + MIX(2) + MIX(3));              // Apply xor, modulate by amp, and mix.
       mix0to7 += (MIX(4) + MIX(5) + MIX(6) + MIX(7));
       Dac::set0to7(mix0to7);
 

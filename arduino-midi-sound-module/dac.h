@@ -65,7 +65,8 @@ class Dac final {
 
     // Synchronize Timers
     TCNT0 = 0x80;                                       // Set timer 0 and 1 counters so that they are 180 degrees out
-    TCNT1H = TCNT1L = 0;                                // of phase, canceling the 62.5kHz carrier wave.
+    TCNT1H = TCNT1L = 0;                                // of phase, canceling the 62.5kHz carrier wave when amplitude is 0.
+
     GTCCR = 0;                                          // Resume timers
   }
   
