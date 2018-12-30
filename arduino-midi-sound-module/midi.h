@@ -6,12 +6,38 @@
     
     Sending MIDI data to the Arduino:
     
+    Option #1: Hairless MIDI
+    ------------------------
+
     The easiest/fastest way to send MIDI data from your computer is to use a MIDI <-> Serial Bridge:
       http://projectgus.github.io/hairless-midiserial/
       
     However, you will need to configure Hairless for 38400 baud to avoid running the buffer for
     incoming MIDI data.  (You will also need to adjust the baud rate passed to begin(..) as well.)
     
+    Option #2: 5-pin DIN
+    --------------------
+
+    You can add an 5-pin DIN serial MIDI input port to the Arduino and use a standard serial MIDI interface.
+    
+                220 
+        .------^v^v^----------o-------.                      .----o--------------o----< +5v
+        |                     |       |                      |    |              |
+        |     .-----.         |  1    |      .--------.      |   === 100nF       /
+        |    / 5-DIN \       _|_ N    o----1-|        |-6----'    |              \ 
+        |   |  (back) |       ^  9    o----2-| H11L1* |-5---------o--< Gnd       / 280
+        |   |o       o|      /_\ 1    |      |        |-4----.                   \
+        |    \ o o o /        |  4    |      '--------'      |                   /
+        |     /-----\         |       |                      |                   |
+        |  4 /       \ 5      |       |                      '-------------------o----> RX
+        '---'         '-------o-------'
+        
+    Notes:
+        * H11L1 is a PC900 equivalent
+
+    Option #3: Mocolufa (requires ISP programmer)
+    ---------------------------------------------
+
     If you have an ISP programmer and an Uno R3 w/ATMega82U, you can make your Arduino Uno appear
     as a native USB MIDI device:
       https://github.com/kuwatay/mocolufa
@@ -106,25 +132,6 @@
         avrdude.exe: safemode: Fuses OK (E:F4, H:D9, L:FF)
 
         avrdude.exe done.  Thank you.
-      
-    Finally, with a bit more circuitry, you can add an 5-pin DIN serial MIDI input port to the
-    Arduino and use a standard serial MIDI interface.
-    
-                220 
-        .------^v^v^----------o-------.                      .----o--------------o----< +5v
-        |                     |       |                      |    |              |
-        |     .-----.         |  1    |      .--------.      |   === 100nF       /
-        |    / 5-DIN \       _|_ N    o----1-|        |-6----'    |              \ 
-        |   |  (back) |       ^  9    o----2-| H11L1* |-5---------o--< Gnd       / 280
-        |   |o       o|      /_\ 1    |      |        |-4----.                   \
-        |    \ o o o /        |  4    |      '--------'      |                   /
-        |     /-----\         |       |                      |                   |
-        |  4 /       \ 5      |       |                      '-------------------o----> RX
-        '---'         '-------o-------'
-        
-    Notes:
-        * H11L1 is a PC900 equivalent
-
 */
 
 #ifndef __MIDI_H__

@@ -1,9 +1,17 @@
 /*
     Driver for combined 17-bit PWM via Timers 0 and 1.
     https://github.com/DLehenbauer/arduino-midi-sound-module
+    
+    The ciruit combines the 8-bit PWM channels of each timer with a 1:256 resistor ratio
+    to create two 16-bit PWM channels.  The synth outputs 8 voices to each 16-bit PWM channel,
+    which are then combined in hardware for a total of 16 voices at 17-bit resolution.
 
-    
-    
+    Splitting the voices between the PWM channels provides necessary headroom when mixing
+    the voices and performing the final combination in hardware saves CPU cycles.
+
+    Another benefit of the dual channel approach is that we can configure the PWMs to cancel
+    each other's carrier waves when the signed output is resting at zero.
+
     Connection to Arduino Uno:
     
                     1M (1%)                  10uf*
@@ -21,14 +29,14 @@
        pin 10 >----^v^v^------'
 
                                                                                                          
-     * Note: A/C coupling capacitor typically optional.
+     * Note: A/C coupling capacitor typically optional.  (Negative is on audio out side.)
      ** Note: RC filtering capacitor can be adjusted to taste:
      
-     8kHz      10kHz      30kHz
+                8kHz      10kHz      30kHz
      2.2nf ~=  -0.7db    -1.1db     -5.6db
      3.3nf ~=  -1.5db    -2.2db     -8.4db
      4.7nf ~=  -2.7db    -3.6db    -11.1db
-     
+
     Excellent reference:
     http://www.openmusiclabs.com/learning/digital/pwm-dac.1.html
     http://www.openmusiclabs.com/learning/digital/pwm-dac/dual-pwm-circuits/index.html
@@ -46,10 +54,10 @@ class Dac final {
     // Note: The standard Arduino core registers a TIMER0_OVF_vect ISR to keep a count of passing
     //       time for 'millis()' and 'delay()'.
     //
-    //       We need to disable interrupts for timer 1, or the Arduino library's ISR interrupt will
-    //       starve our other work once we increase it's frequency for PWM.
-    TIMSK0 = 0;
-    TIMSK1 = 0;                                         // Disable any interrupts registered for Timer 1
+    //       We need to disable interrupts for timer 0, or the Arduino library's ISR interrupt will
+    //       starve our other work once we increase the timer's frequency for PWM.
+    TIMSK0 = 0;                                         // Disable Timer 0 interrupts 
+    TIMSK1 = 0;                                         // Disable Timer 1 interrupts
       
     // Setup Timer0 for PWM
     TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM01) | _BV(WGM00);   // Fast PWM (non-inverting), Top 0xFF
@@ -72,12 +80,14 @@ class Dac final {
   
   static void set0to7(int16_t out) {
     uint16_t u = static_cast<uint16_t>(out) + 0x8000;
-    OCR0A = u >> 8;    OCR0B = u & 0xFF;
+    OCR0A = u >> 8;
+    OCR0B = u & 0xFF;
   }
   
   static void set8toF(int16_t out) {
     uint16_t u = static_cast<uint16_t>(out) + 0x8000;
-    OCR1B = u >> 8;    OCR1A = u & 0xFF;
+    OCR1B = u >> 8;
+    OCR1A = u & 0xFF;
   }
 };
 
