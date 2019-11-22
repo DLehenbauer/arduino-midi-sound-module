@@ -1,7 +1,7 @@
 # Arduino MIDI Sound Module
 Turns an Arduino Uno into a 16-voice wavetable synthesizer.  Functions as a MIDI sound module.  Typical usage includes generating sound for a MIDI keyboard controller or playback of MIDI files.
 
-## Demo
+## Demo (Click image to play)
 [![Arduino - Star Wars (Video)](https://img.youtube.com/vi/LdMxA-0den4/0.jpg)](https://www.youtube.com/watch?v=LdMxA-0den4)
 
 ## General MIDI Subset
