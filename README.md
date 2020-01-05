@@ -1,7 +1,7 @@
 # Arduino MIDI Sound Module
 Turn your Arduino Uno into a 16-voice wavetable synthesizer/MIDI sound generator.
 
-[![Image](media/Ardunio-MIDI-Sound-Module-Photo.jpg)](media/Ardunio-MIDI-Sound-Module-Photo.jpg)
+[![Image](media/Ardunio-MIDI-Sound-Module-Photo.jpg)](https://raw.githubusercontent.com/DLehenbauer/arduino-midi-sound-module/master/media/Ardunio-MIDI-Sound-Module-Photo.jpg)
 
 # General MIDI Subset
 Implements the most commonly used features of the General MIDI 1.0 standard, including:
@@ -22,7 +22,7 @@ Implements the most commonly used features of the General MIDI 1.0 standard, inc
 * Documented C++ code builds in Arduino IDE or Atmel Studio 6.0
 
 # Hardware
-[![Schematic](media/Ardunio-MIDI-Sound-Module-Plans.png)](media/Ardunio-MIDI-Sound-Module-Plans.png)
+[![Schematic](media/Ardunio-MIDI-Sound-Module-Plans.png)](https://raw.githubusercontent.com/DLehenbauer/arduino-midi-sound-module/master/media/Ardunio-MIDI-Sound-Module-Plans.png)
 
 # Resources
 * [Open Music Labs - PWM DAC](http://www.openmusiclabs.com/learning/digital/pwm-dac.1.html)
