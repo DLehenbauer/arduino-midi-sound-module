@@ -1,11 +1,24 @@
 /*
     Main 'setup()' & 'loop()' definitions, shared with main.cpp and *.ino
     https://github.com/DLehenbauer/arduino-midi-sound-module
+
+    For schematics, see:
+      dac.h          - Audio output circuit
+      midi.h         - MIDI input options, serial driver, and midi dispatch
+      ssd1306.h      - OLED display connections and driver
+
+    For more sound generation, see:
+      synth.h        - Core synth engine
+      envelope.h     - Flexible envelope generator used to modulate amp, freq, and wave
+      midisynth.h    - Extends synth engine w/additional state for MIDI processing
+      instruments*.h - Wavetable and envelope generator programs for GM MIDI instruments
 */
 
 #ifndef MAIN_H_
 #define MAIN_H_
 
+// NOTE: The *.ino file '#defines USE_HAIRLESS_MIDI', so if you built this from an Arduino
+//       IDE sketch, you're configured to use Hairless MIDI at 38400 baud by default.
 #ifdef USE_HAIRLESS_MIDI
   #define MIDI_BAUD 38400
 #else

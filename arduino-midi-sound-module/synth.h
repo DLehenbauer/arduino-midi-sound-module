@@ -6,7 +6,7 @@
       - 16 voices sampled & mixed in real-time at ~20kHz
       - Wavetable and white noise sources
       - Amplitude, frequency, and wavetable offset modulated by envelope generators
-      - Additional volume control per voice (matching MIDI velocity)
+      - Additional volume control per voice (MIDI velocity and channel volume)
 
     Sample, mixing, and output occurs on the Timer 2 ISR.  (Timer 2 was chosen because
     it's PWM output pins conflict with SPI, making it ill suited for PWM output for this
@@ -15,7 +15,7 @@
     Notes:
       - The sample/mix ISR is carefully arranged to minimize spilling registers to memory.
       
-      - To avoid missing arriving MIDI messages, the Timer2 ISR reenables interrupts so
+      - To avoid missing arriving MIDI messages, the Timer2 ISR re-enables interrupts so
         that it can be preempted by the USART RX ISR.
         
         (However, it disables Timer2 ISRs until it's ready to exit to avoid reentrancy.)
@@ -30,21 +30,13 @@
 #include <stdint.h>
 #include "instruments.h"
 #include "envelope.h"
-#include "ltc16xx.h"
-#include "pwm0.h"
-#include "pwm01.h"
-#include "pwm1.h"
+#include "dac.h"
 
 // With GCC, we can calculate the _noteToPitch table at compile time.
 #ifndef __EMSCRIPTEN__
 constexpr static uint16_t interval(double sampleRate, double note) {
   return round(pow(2, (note - 69.0) / 12.0) * 440.0 / sampleRate * static_cast<double>(0xFFFF));
 }
-#endif
-
-// If unspecified, choose the default DAC.
-#ifndef DAC
-  #define DAC Pwm0
 #endif
 
 class Synth {
@@ -111,7 +103,7 @@ class Synth {
     static volatile Envelope			v_freqMod[Synth::numVoices];		  // Frequency modulation (-64 .. +64)
     static volatile Envelope			v_waveMod[Synth::numVoices];		  // Wave offset modulation (0 .. 127)
 
-    static volatile uint8_t			  v_vol[Synth::numVoices];			    // Additional 7-bit volume scalar (i.e., MIDI velocity).
+    static volatile uint8_t			  v_vol[Synth::numVoices];			    // 7-bit volume scalar (0 .. 127)
 
     static          uint16_t		  _baseInterval[Synth::numVoices];  // Original Q8.8 sampling internal, prior to modulation, pitch bend, etc.
     static volatile uint16_t		  v_bentInterval[Synth::numVoices];	// Q8.8 sampling internal post pitch bend, but prior to freqMod.
@@ -120,7 +112,7 @@ class Synth {
   
   public:
     void begin(){
-      DAC::setup();
+      Dac::setup();
 
       // Setup Timer2 for sample/mix/output ISR.
       TCCR2A = _BV(WGM21);                // CTC Mode (Clears timer and raises interrupt when OCR2B reaches OCR2A)
@@ -170,11 +162,13 @@ class Synth {
       return current;
     }
 
-    void noteOn(uint8_t voice, uint8_t note, uint8_t velocity, const Instrument& instrument) {
+    // Note that MidiSynth preprocesses both note velocity and channel volume into the single
+    // volume scalar.
+    void noteOn(uint8_t voice, uint8_t note, uint8_t volume, const Instrument& instrument) {
       const uint8_t flags = instrument.flags;
       
       if (flags & InstrumentFlags_HalfAmplitude) {                  // If the half-amplitude flag is set, play at 1/2 volume.  (Allows some
-        velocity >>= 1;                                             // reuse of amplitude envelopes for softer instruments, like hi-hats.)
+        volume >>= 1;                                               // reuse of amplitude envelopes for softer instruments, like hi-hats.)
       }
     
       bool isNoise = flags & InstrumentFlags_Noise;                 // If true, the ISR will periodically overwrite 'v_xor[]' with a random
@@ -201,7 +195,7 @@ class Synth {
       v_xor[voice] = instrument.xorBits;
       v_amp[voice] = 0;
       v_isNoise[voice] = isNoise;
-      v_vol[voice] = velocity;
+      v_vol[voice] = volume;
       v_ampMod[voice].start(instrument.ampMod + ampOffset);
       v_freqMod[voice].start(instrument.freqMod);
       v_waveMod[voice].start(instrument.waveMod);
@@ -213,6 +207,15 @@ class Synth {
       suspend();                                                    // Suspend audio processing before updating state shared with the ISR.
       v_ampMod[voice].stop();                                       // Move amplitude envelope to 'release' stage, if not there already.
       resume();                                                     // Resume audio processing.
+    }
+
+    // Update the current volume for the given voice.  Note that MidiSynth preprocesses both note velocity
+    // and channel volume into the single volume scalar.
+    void setVolume(uint8_t voice, uint8_t volume) {
+      // Suspend audio processing before updating state shared with the ISR.
+      suspend();
+      v_vol[voice] = volume;
+      resume();
     }
   
     void pitchBend(uint8_t voice, int16_t value) {
@@ -227,7 +230,14 @@ class Synth {
       int32_t product;
 
     #ifndef __EMSCRIPTEN__
-      // https://mekonik.wordpress.com/2009/03/18/arduino-avr-gcc-multiplication/
+      // It can be challenging for the synth to process a pitch bend in real-time.
+      // Pitch bench adjustments often occur at high frequency, and the calculation
+      // involves an expensive S16 x U16 multiplication.
+      // 
+      // The multibyte multiplication code generated by AVR8/GNU C Compiler 5.4.0 (-Os)
+      // is suboptimal for S16 x U16.  To help, we resort to inline assembly.
+      // 
+      // (See https://mekonik.wordpress.com/2009/03/18/arduino-avr-gcc-multiplication/)
       asm volatile (
         "clr r26 \n\t"
         "mul %A1, %A2 \n\t"
@@ -302,10 +312,6 @@ class Synth {
         }
       }
 
-      // If using an SPI DAC, we transmit the sample computed in the previous ISR concurrently
-      // with calculating the next sample.
-      DAC::sendHiByte();										                              // Begin transmitting upper 8-bits to DAC.
-
       // Macro that advances 'v_phase[voice]' by the sampling interval 'v_interval[voice]' and
       // stores the next 8-bit sample offset as 'offset##voice'.
       #define PHASE(voice) uint8_t offset##voice = ((v_phase[voice] += v_interval[voice]) >> 8)
@@ -316,8 +322,8 @@ class Synth {
       // Macro that applies 'v_xor[voice]' to 'sample##voice' and multiplies by 'v_amp[voice]'.
       #define MIX(voice) ((sample##voice ^ v_xor[voice]) * v_amp[voice])
     
-      // We The below sampling/mixing code is carefully arranged to allow the compiler to make use of fixed
-      // offsets for loads and stores, and to leave temporary calculations in register.
+      // The below sampling/mixing code is carefully arranged to allow the compiler to make use of fixed
+      // offsets for loads and stores and to leave intermediate calculations in register.
     
       PHASE(0); PHASE(1); PHASE(2); PHASE(3);                             // Advance the Q8.8 phase and calculate the 8-bit offsets into the wavetable.
       PHASE(4); PHASE(5); PHASE(6); PHASE(7);                             // (Load stores should use constant offsets and results should stay in register.)
@@ -325,10 +331,10 @@ class Synth {
       SAMPLE(0); SAMPLE(1); SAMPLE(2); SAMPLE(3);                         // Sample the wavetable at the offsets calculated above.
       SAMPLE(4); SAMPLE(5); SAMPLE(6); SAMPLE(7);                         // (Samples should stay in register.)
     
-      int16_t mix = (MIX(0) + MIX(1) + MIX(2) + MIX(3)) >> 1;             // Apply xor, modulate by amp, and mix.
-      mix += (MIX(4) + MIX(5) + MIX(6) + MIX(7)) >> 1;
-
-      DAC::sendLoByte();													                        // First byte should be done, begin transmitting the lower 8-bits.
+      int16_t mix0to7;                                                    // For voices 0..7
+      mix0to7  = (MIX(0) + MIX(1) + MIX(2) + MIX(3));                     //   apply xor, modulate by amp, and mix.
+      mix0to7 += (MIX(4) + MIX(5) + MIX(6) + MIX(7));
+      Dac::set0to7(mix0to7);                                              //   output to PWM on Timer 0 
 
       PHASE(8); PHASE(9); PHASE(10); PHASE(11);                           // Advance the Q8.8 phase and calculate the 8-bit offsets into the wavetable.
       PHASE(12); PHASE(13); PHASE(14); PHASE(15);                         // (Load stores should use constant offsets and results should stay in register.)
@@ -336,25 +342,23 @@ class Synth {
       SAMPLE(8); SAMPLE(9); SAMPLE(10); SAMPLE(11);                       // Sample the wavetable at the offsets calculated above.
       SAMPLE(12); SAMPLE(13); SAMPLE(14); SAMPLE(15);                     // (Samples should stay in register.)
     
-      mix += (MIX(8) + MIX(9) + MIX(10) + MIX(11)) >> 1;                  // Apply xor, modulate by amp, and mix.
-      mix += (MIX(12) + MIX(13) + MIX(14) + MIX(15)) >> 1;
+      int16_t mix8toF;                                                    // For vocies 8..F
+      mix8toF  = (MIX(8) + MIX(9) + MIX(10) + MIX(11));                   //   apply xor, modulate by amp, and mix.
+      mix8toF += (MIX(12) + MIX(13) + MIX(14) + MIX(15));
+      Dac::set8toF(mix8toF);                                              //   output to PWM on Timer 1
 
       #undef MIX
       #undef SAMPLE
       #undef PHASE
     
-      const uint16_t wavOut = mix + 0x8000;
-      DAC::set(wavOut);													                          // Store resulting wave output for transmission on next interrupt.
-                                                                          // (If using SPI, also deselects DAC and clears EOT bit.)
-    
       TIMSK2 = _BV(OCIE2A);                                               // Restore timer2 interrupts.
     
-      return wavOut;
+      return (mix0to7 >> 1) + (mix8toF >> 1) + 0x8000;                    // For Emscripten, return as a single singned value (GCC/AVR will elide this code).
     }
 
   
     // Suspends audio processing ISR.  While suspended, it is safe to update of volatile state
-    // shared with the ISR and to communicate with other SPI devices.
+    // shared with the ISR.
     void suspend() __attribute__((always_inline)) {
       cli();
       TIMSK2 = 0;

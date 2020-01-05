@@ -4,18 +4,10 @@
 */
 
 /*
-    Baseline (w/Pwm0):
-    Program Memory Usage 	:	32100 bytes
-    Data Memory Usage 		:	1019 bytes
-
-    Ltc16xx:  +18B
-    Pwm1:     +32B
-    Pwm01:    +72B
+    Baseline:
+        Program Memory Usage 	:	32192 bytes   98.2 % Full
+        Data Memory Usage 		:	1052 bytes   51.4 % Full
 */
-
-//#define DAC Pwm1
-//#define DAC Pwm01
-//#define DAC Ltc16xx<PinId::D10>
 
 #ifndef ARDUINO
 #ifndef __EMSCRIPTEN__
@@ -32,5 +24,6 @@ int main() {
   
   return 0;
 }
+
 #endif // !__EMSCRIPTEN__
 #endif // !ARDUINO

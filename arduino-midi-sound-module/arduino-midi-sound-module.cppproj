@@ -205,6 +205,9 @@
     <None Include="emscripten\bindings.cpp">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="dac.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="emscripten\util\delay.h">
       <SubType>compile</SubType>
     </Compile>
@@ -212,9 +215,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="envelope.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="ltc16xx.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.cpp">
@@ -229,22 +229,7 @@
     <Compile Include="midisynth.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="pin.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="pwm0.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="pwm01.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="pwm1.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="ringbuffer.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="spi.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="ssd1306.h">
