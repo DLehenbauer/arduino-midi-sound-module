@@ -1,18 +1,29 @@
 # Arduino MIDI Sound Module
-Turns an Arduino Uno into a 16-voice wavetable synthesizer.  Functions as a MIDI sound module.  Typical usage includes generating sound for a MIDI keyboard controller or playback of MIDI files.
+Turn your Arduino Uno into a 16-voice wavetable synthesizer/MIDI sound generator.
 
-## Demo
-[![Arduino - Star Wars (Video)](https://img.youtube.com/vi/LdMxA-0den4/0.jpg)](https://www.youtube.com/watch?v=LdMxA-0den4)
+[![Image](media/Ardunio-MIDI-Sound-Module-Photo.jpg)](media/Ardunio-MIDI-Sound-Module-Photo.jpg)
 
-## General MIDI Subset
-The MIDI synth implements the most commonly used features of the General MIDI 1.0 standard, including:
+# General MIDI Subset
+Implements the most commonly used features of the General MIDI 1.0 standard, including:
 * 128 standard instruments
 * 45 percussion instruments
 * 16 note polyphony with key velocity
-* Note on/off, program change, pitch bend, and all channel notes off.
+* Note on/off, program change, pitch bend, channel volume and all notes off.
 
-## Synth Engine      
+Hear it in action (click to watch video):
+
+[![Arduino - Star Wars (Video)](https://img.youtube.com/vi/LdMxA-0den4/0.jpg)](https://www.youtube.com/watch?v=LdMxA-0den4)
+
+# Synth Engine      
 * 16 voices sampled & mixed in real-time at ~20kHz
 * Wavetable and white noise sources
 * Amplitude, frequency, and wavetable offset modulated by envelope generators
-* Additional volume control per voice (used for MIDI velocity)
+* Additional volume control per voice (used for MIDI volume and velocity)
+* Documented C++ code builds in Arduino IDE or Atmel Studio 6.0
+
+# Hardware
+[![Schematic](media/Ardunio-MIDI-Sound-Module-Plans.png)](media/Ardunio-MIDI-Sound-Module-Plans.png)
+
+# Resources
+* [Open Music Labs - PWM DAC](http://www.openmusiclabs.com/learning/digital/pwm-dac.1.html)
+* [Open Music Labs - Dual PWM Circuits](http://www.openmusiclabs.com/learning/digital/pwm-dac/dual-pwm-circuits/index.html)
