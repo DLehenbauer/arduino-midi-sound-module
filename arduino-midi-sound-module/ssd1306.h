@@ -97,9 +97,9 @@ class Ssd1306 final {
 
       beginCommand();
       send(Command_SetDisplayOff);
-      send(Command_SetDisplayClock);
+      send(Command_SetDisplayClock);      // A[3:0] = DCLK divide ratio, A[7:4] = Oscillator frequency
       send(0x80);
-      send(Command_SetMultiplexRatio);
+      send(Command_SetMultiplexRatio);    // A[7:0] = Multiplex ratio in the range 16..63
       send(0x3F);
       send(Command_SetDisplayOffset);
       send(0x00);

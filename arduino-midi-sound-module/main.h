@@ -17,11 +17,8 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-// NOTE: Uncomment the following '#define' if using Hairless to send MIDI data to the Arduino.
-//       (See midi.h for more details)
-
-// #define USE_HAIRLESS_MIDI
-
+// NOTE: The *.ino file '#defines USE_HAIRLESS_MIDI', so if you built this from an Arduino
+//       IDE sketch, you're configured to use Hairless MIDI at 38400 baud by default.
 #ifdef USE_HAIRLESS_MIDI
   #define MIDI_BAUD 38400
 #else

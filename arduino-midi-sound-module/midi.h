@@ -3,18 +3,28 @@
     https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Receives, decodes, and dispatches MIDI data arriving via the Arduino Uno's serial USART.
+
+    Below discusses options for getting MIDI data into the Arduino.
     
-    Sending MIDI data to the Arduino:
+    NOTE: Option #1 requires running at 38400 baud, while options #2 and #3 use the MIDI standard
+          speed of 31250.  The *.ino file contains the following:
+
+          // Defining 'USE_HAIRLESS_MIDI' will set the serial baud rate to 38400.  Comment out the
+          // below #define to use standard MIDI speed of 31250 baud.
+          #define USE_HAIRLESS_MIDI
+
+          You'll need to remove this to use options #1 or #3.          
     
     Option #1: Hairless MIDI
     ------------------------
 
     The easiest/fastest way to send MIDI data from your computer is to use a MIDI <-> Serial Bridge:
       http://projectgus.github.io/hairless-midiserial/
-      
-    However, you will need to configure Hairless for 38400 baud to avoid running the buffer for
-    incoming MIDI data.  (You will also need to adjust the baud rate passed to begin(..) as well.)
-    
+
+    Note: You must configure both Hairless and the Arduino sketch to use 38400 (faster speeds will
+          overrun the incomming MIDI buffer).  Also see above note regarding configuring the baud
+          speed for the firmware.
+
     Option #2: 5-pin DIN
     --------------------
 
