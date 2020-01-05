@@ -12,7 +12,7 @@ Implements the most commonly used features of the General MIDI 1.0 standard, inc
 
 Hear it in action (click to watch video):
 
-[![Arduino - Star Wars (Video)](https://img.youtube.com/vi/LdMxA-0den4/0.jpg)](https://www.youtube.com/watch?v=LdMxA-0den4)
+[![Arduino - Imperial March (Video)](media/Thumbnail.jpg)](https://www.youtube.com/watch?v=4pCgZSmhi4E)
 
 # Synth Engine      
 * 16 voices sampled & mixed in real-time at ~20kHz
