@@ -18,12 +18,13 @@ Implements the most commonly used features of the General MIDI 1.0 standard, inc
 * 16 voices sampled & mixed in real-time at ~20kHz
 * Wavetable and white noise sources
 * Amplitude, frequency, and wavetable offset modulated by envelope generators
-* Additional volume control per voice (used for MIDI volume and velocity)
+* Additional volume control per voice (used for channel volume and key velocity)
 * Documented C++ code builds in Arduino IDE or Atmel Studio 6.0
 
 # Hardware
 [![Schematic](media/Ardunio-MIDI-Sound-Module-Plans.png)](https://raw.githubusercontent.com/DLehenbauer/arduino-midi-sound-module/master/media/Ardunio-MIDI-Sound-Module-Plans.png)
 
 # Resources
+* [The Kik Gen Labs - USBMidiKlik](https://github.com/TheKikGen/USBMidiKliK)
 * [Open Music Labs - PWM DAC](http://www.openmusiclabs.com/learning/digital/pwm-dac.1.html)
 * [Open Music Labs - Dual PWM Circuits](http://www.openmusiclabs.com/learning/digital/pwm-dac/dual-pwm-circuits/index.html)
