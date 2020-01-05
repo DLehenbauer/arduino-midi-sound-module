@@ -10,7 +10,7 @@ Implements the most commonly used features of the General MIDI 1.0 standard, inc
 * 16 note polyphony with key velocity
 * Note on/off, program change, pitch bend, channel volume and all notes off.
 
-Hear it in action (click to watch video):
+Hear it in action:
 
 [![Arduino - Imperial March (Video)](media/Thumbnail.jpg)](https://www.youtube.com/watch?v=4pCgZSmhi4E)
 
