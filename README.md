@@ -24,7 +24,11 @@ Implements the most commonly used features of the General MIDI 1.0 standard, inc
 # Hardware
 [![Schematic](media/Ardunio-MIDI-Sound-Module-Plans.png)](https://raw.githubusercontent.com/DLehenbauer/arduino-midi-sound-module/master/media/Ardunio-MIDI-Sound-Module-Plans.png)
 
+# Useful Tools
+* [Hairless MIDI](https://projectgus.github.io/hairless-midiserial/) - Use default settings and `#define USE_HAIRLESS_MIDI`
+* [The Kik Gen Labs - USBMidiKlik](https://github.com/TheKikGen/USBMidiKliK) - Do not `#define USE_HAIRLESS_MIDI`
+* [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html)
+
 # Resources
-* [The Kik Gen Labs - USBMidiKlik](https://github.com/TheKikGen/USBMidiKliK)
 * [Open Music Labs - PWM DAC](http://www.openmusiclabs.com/learning/digital/pwm-dac.1.html)
 * [Open Music Labs - Dual PWM Circuits](http://www.openmusiclabs.com/learning/digital/pwm-dac/dual-pwm-circuits/index.html)
