@@ -53,9 +53,7 @@ class MidiSynth final : public Synth {
       for (int8_t voice = maxVoice; voice >= 0; voice--) {                      // For each voice
         if (voiceToNote[voice] == note && voiceToChannel[voice] == channel) {   //   that is currently playing the note on this channel
           noteOff(voice);                                                       //      stop playing the note
-          voiceToChannel[voice] = 0xFF;                                         //      and remove the voice from our voice -> note/channel
-          voiceToNote[voice] = 0xFF;                                            //      maps so we ignore it for future node off / pitch bench
-        }                                                                       //      messages.
+        }
       }
     }
 
@@ -96,16 +94,31 @@ class MidiSynth final : public Synth {
           }
           break;
         }
-        case 0x7B: {
+        
+        case 0x78: {
           switch (value) {
-            // All Notes Off (for current channel):
-            case 0: {                                                    
+            case 0: {
+              // All Sound Off (for current channel):
               for (int8_t voice = maxVoice; voice >= 0; voice--) {  // For each voice
                 if (voiceToChannel[voice] == channel) {             //   currently playing any note on this channel
                   noteOff(voice);                                   //     stop playing the note
-                  voiceToChannel[voice] = 0xFF;                     //      and remove the voice from our voice -> note/channel
-                  voiceToNote[voice] = 0xFF;                        //      maps so we ignore it for future node off / pitch bench
-                }                                                   //      messages.
+                  setVolume(voice, 0);                              //     immediately silence the voice
+                }
+              }
+              break;
+            }
+          }
+          break;
+        }
+        
+        case 0x7B: {
+          switch (value) {
+            case 0: {                                                    
+              // All Notes Off (for current channel):
+              for (int8_t voice = maxVoice; voice >= 0; voice--) {  // For each voice
+                if (voiceToChannel[voice] == channel) {             //   currently playing any note on this channel
+                  noteOff(voice);                                   //     stop playing the note
+                }
               }
               break;
             }
@@ -116,11 +129,11 @@ class MidiSynth final : public Synth {
     }
 }; //MidiSynth
 
-uint8_t     MidiSynth::voiceToNote[numVoices] = { 0 };
-uint8_t     MidiSynth::voiceToChannel[numVoices] = { 0 };
+uint8_t     MidiSynth::voiceToNote[numVoices]               = { 0 };
+uint8_t     MidiSynth::voiceToChannel[numVoices]            = { 0 };
 Instrument  MidiSynth::channelToInstrument[numMidiChannels] = { 0 };
-uint8_t     MidiSynth::channelToVolume[numMidiChannels] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-uint8_t     MidiSynth::voiceToVolume[numVoices] = { 0 };
-uint8_t     MidiSynth::voiceToVelocity[numVoices] = { 0 };
+uint8_t     MidiSynth::channelToVolume[numMidiChannels]     = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+uint8_t     MidiSynth::voiceToVolume[numVoices]             = { 0 };
+uint8_t     MidiSynth::voiceToVelocity[numVoices]           = { 0 };
 
 #endif //__MIDISYNTH_H__
