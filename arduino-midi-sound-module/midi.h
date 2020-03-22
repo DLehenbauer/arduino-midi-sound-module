@@ -22,7 +22,7 @@
       http://projectgus.github.io/hairless-midiserial/
 
     Note: You must configure both Hairless and the Arduino sketch to use 38400 (faster speeds will
-          overrun the incomming MIDI buffer).  Also see above note regarding configuring the baud
+          overrun the incoming MIDI buffer).  Also see above note regarding configuring the baud
           speed for the firmware.
 
     Option #2: 5-pin DIN
@@ -159,15 +159,15 @@ extern void programChange(uint8_t channel, uint8_t program);
 extern void sysex(uint8_t cbData, uint8_t bytes[]);
 
 enum MidiStatus : uint8_t {
-  /* 0x8n */ MidiStatus_NoteOff				    = 0,     // 2 data bytes
-  /* 0x9n */ MidiStatus_NoteOn				    = 1,     // 2 data bytes
-  /* 0xAn */ MidiStatus_PolyKeyPressure		= 2,     // 2 data bytes
-  /* 0xBn */ MidiStatus_ControlChange			= 3,     // 2 data bytes
-  /* 0xCn */ MidiStatus_ProgramChange			= 4,     // 1 data bytes
-  /* 0xDn */ MidiStatus_ChannelPressure		= 5,     // 1 data bytes
-  /* 0xEn */ MidiStatus_PitchBend				  = 6,     // 2 data bytes
-  /* 0xFn */ MidiStatus_Extended				  = 7,     // (variable length)
-  /* ???  */ MidiStatus_Unknown				    = 8      // (unknown)
+  /* 0x8n */ MidiStatus_NoteOff                = 0,     // 2 data bytes
+  /* 0x9n */ MidiStatus_NoteOn                 = 1,     // 2 data bytes
+  /* 0xAn */ MidiStatus_PolyKeyPressure        = 2,     // 2 data bytes
+  /* 0xBn */ MidiStatus_ControlChange          = 3,     // 2 data bytes
+  /* 0xCn */ MidiStatus_ProgramChange          = 4,     // 1 data bytes
+  /* 0xDn */ MidiStatus_ChannelPressure        = 5,     // 1 data bytes
+  /* 0xEn */ MidiStatus_PitchBend              = 6,     // 2 data bytes
+  /* 0xFn */ MidiStatus_Extended               = 7,     // (variable length)
+  /* ???  */ MidiStatus_Unknown                = 8      // (unknown)
 };
 
 class Midi final {
@@ -186,7 +186,7 @@ class Midi final {
       /* 0xFn: MidiCommand_Extended              */ maxMidiData
     };
 
-    static MidiStatus midiStatus;			      // Status of the incoming message
+    static MidiStatus midiStatus;           // Status of the incoming message
     static uint8_t midiChannel;             // Channel of the incoming message
     static uint8_t midiDataRemaining;       // Expected number of data bytes remaining
     static uint8_t midiDataIndex;           // Location at which next data byte will be written
@@ -229,7 +229,7 @@ class Midi final {
       }
     
       /* TODO: Handle running status?
-      midiDataRemaining = midiStatusToDataLength[midiStatus];				// Running Status: reset the midi data buffer for the current midi status
+      midiDataRemaining = midiStatusToDataLength[midiStatus];                // Running Status: reset the midi data buffer for the current midi status
       midiDataIndex = 0;
       */
     }
@@ -255,23 +255,23 @@ class Midi final {
     // Called by 'dispatch()' to decode the next byte of a MIDI message.  The message is
     // dispatched tho the appropriate handler if it completes the current message.
     static void decode(uint8_t byte) {
-      if (byte & 0x80) {													        // If the high bit is set, this is the start of a new message
-        if (midiStatus == MidiStatus_Extended) {					//   If the previous status was an extended message (sysex or real-time)
-          sysex(midiDataIndex, midiData);								  //     the next byte must be 0xF7 (i.e., EOX).  Ignore EOX and dispatch the sysex().
-          midiStatus = MidiStatus_Unknown;							  //     The following byte must be a status byte beginning the next message.
+      if (byte & 0x80) {                                         // If the high bit is set, this is the start of a new message
+        if (midiStatus == MidiStatus_Extended) {                 //   If the previous status was an extended message (sysex or real-time)
+          sysex(midiDataIndex, midiData);                        //     the next byte must be 0xF7 (i.e., EOX).  Ignore EOX and dispatch the sysex().
+          midiStatus = MidiStatus_Unknown;                       //     The following byte must be a status byte beginning the next message.
           return;
         }
       
         midiStatus = static_cast<MidiStatus>((byte >> 4) - 8);
-        midiDataRemaining = midiStatusToDataLength[midiStatus];			// Set the expected data bytes for the new message status.
-        midiDataIndex = 0;												                  // Reset the midi data buffer.
+        midiDataRemaining = midiStatusToDataLength[midiStatus];  // Set the expected data bytes for the new message status.
+        midiDataIndex = 0;                                       // Reset the midi data buffer.
         midiChannel = byte & 0x0F;
       } else {
-        if (midiDataRemaining > 0) {					            // If more data bytes are expected for the current midi status
-          midiData[midiDataIndex++] = byte;			          //	 then copy the next byte into the data buffer
-          midiDataRemaining--;						                //	   and decrement the remaining data bytes expected.
-          if (midiDataRemaining == 0) {				            //   If this was the last data byte expected
-            dispatchCommand();						                //     then dispatch the current command.
+        if (midiDataRemaining > 0) {                             // If more data bytes are expected for the current midi status
+          midiData[midiDataIndex++] = byte;                      //     then copy the next byte into the data buffer
+          midiDataRemaining--;                                   //       and decrement the remaining data bytes expected.
+          if (midiDataRemaining == 0) {                          //   If this was the last data byte expected
+            dispatchCommand();                                   //     then dispatch the current command.
           }
         }
       }

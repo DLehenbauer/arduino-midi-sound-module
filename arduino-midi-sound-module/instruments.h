@@ -20,11 +20,11 @@ struct EnvelopeProgram {
 };
 
 enum InstrumentFlags : uint8_t {
-  InstrumentFlags_None				      = 0,
-  InstrumentFlags_Noise				      = (1 << 0),   // Instrument XOR is periodically clobbered with a random value (white noise)
-  InstrumentFlags_HalfAmplitude		  = (1 << 1),   // Note velocity is halved, reducing volume (allows some reuse of EnvelopePrograms for softer instruments)
-  InstrumentFlags_SelectAmplitude		= (1 << 2),   // +0-3 offset to the amplitude EnvelopeProgram index depending on note played.
-  InstrumentFlags_SelectWave			  = (1 << 3),   // +0-196 offset to the wavetable pointer depending on the note played.
+  InstrumentFlags_None             = 0,
+  InstrumentFlags_Noise            = (1 << 0),   // Instrument XOR is periodically clobbered with a random value (white noise)
+  InstrumentFlags_HalfAmplitude    = (1 << 1),   // Note velocity is halved, reducing volume (allows some reuse of EnvelopePrograms for softer instruments)
+  InstrumentFlags_SelectAmplitude  = (1 << 2),   // +0-3 offset to the amplitude EnvelopeProgram index depending on note played.
+  InstrumentFlags_SelectWave       = (1 << 3),   // +0-196 offset to the wavetable pointer depending on the note played.
 };
 
 struct Instrument {
@@ -70,11 +70,11 @@ class Instruments {
         86 Open Surdo
         */
 
-      uint8_t index = note - 35;							        // Calculate the the index of the percussion instrument relative
-      if (index > 45) { index = 45; }					        // to the beginning of the percussion instruments (i.e., less 128).
+      uint8_t index = note - 35;                      // Calculate the the index of the percussion instrument relative
+      if (index > 45) { index = 45; }                 // to the beginning of the percussion instruments (i.e., less 128).
 
-      Instruments::getInstrument(0x80 + index,			  // Load the percussion instrument
-        instrument);		                              // (Note: percussion instruments begin at 128)
+      Instruments::getInstrument(0x80 + index,        // Load the percussion instrument
+        instrument);                                  // (Note: percussion instruments begin at 128)
 
       return pgm_read_byte(&percussionNotes[index]);  // Return the frequency (i.e., midi note) to play the instrument.
     }

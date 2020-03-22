@@ -8,7 +8,7 @@ Implements the most commonly used features of the General MIDI 1.0 standard, inc
 * 128 standard instruments
 * 45 percussion instruments
 * 16 note polyphony with key velocity
-* Note on/off, program change, pitch bend, channel volume and all notes off.
+* Note on/off, program change, pitch bend, channel volume, all notes and all sounds off.
 
 # Demo
 

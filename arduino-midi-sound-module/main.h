@@ -60,9 +60,7 @@ void setup() {
 // Note: Because this is the only call to 'display.send7()', AVR8/GNU C Compiler v5.4.0 will
 //       inline it (even with -Os), and then jump into Midi::dispatch().
 void display_send7(uint8_t mask) {
-  synth.suspend();                            // Suspend audio processing ISR so display has exclusive access to SPI.
   display.set7x8(mask);                       // Set first 7 columns of currently selected 8x8 block to given 'mask'.
-  synth.resume();                             // Resume audio processing.
   Midi::dispatch();                           // (Drain the pending queue of MIDI messages)
 }
 
@@ -91,10 +89,8 @@ void loop() {
   const int8_t page = 7 - (y >> 3);           // Calculate the 8px page that contains 'y'.
   Midi::dispatch();                           // (Drain the pending queue of MIDI messages)
   
-  synth.suspend();                            // Suspend audio processing ISR so display has exclusive access to SPI.
   display.select(x, x + 6, 0, 7);             // Select the 7px x 64px area of the display containing the current bar.
-  synth.resume();                             // Resume audio processing.
-  
+   
   for (int8_t i = page; i > 0; i--) {         // Clear 7x8 blocks above the new bar graph's current level.
     display_send7(0x00);
   }
