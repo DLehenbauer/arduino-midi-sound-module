@@ -61,8 +61,8 @@ class Dac final {
       
     // Setup Timer0 for PWM
     TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM01) | _BV(WGM00);   // Fast PWM (non-inverting), Top 0xFF
-    TCCR0B = _BV(CS10);												                      // Prescale None
-    DDRD |= _BV(DDD5) | _BV(DDD6);									                // Output PWM to DDD5 / DDD6
+    TCCR0B = _BV(CS10);                                             // Prescale None
+    DDRD |= _BV(DDD5) | _BV(DDD6);                                  // Output PWM to DDD5 / DDD6
 
     // Setup Timer1 for PWM
     TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM11);    // Toggle OC1A/OC1B on Compare Match, Fast PWM (non-inverting)

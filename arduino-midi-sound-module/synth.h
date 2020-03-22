@@ -92,23 +92,23 @@ class Synth {
     // Note: Members prefixed with 'v_' (as in volatile) are shared with the ISR, and should only
     //       be accessed outside the ISR after calling 'suspend()' to suspend the ISR.
 
-    static volatile const int8_t*	v_wave[Synth::numVoices];			    // Starting address of 256b wave table.
-    static volatile uint16_t		  v_phase[Synth::numVoices];			  // Phase accumulator holding the Q8.8 offset of the next sample.
-    static volatile uint16_t		  v_interval[Synth::numVoices];		  // Q8.8 sampling interval, used to advance the '_phase' accumulator.
-    static volatile int8_t			  v_xor[Synth::numVoices];			    // XOR bits applied to each sample (Note: clobbered if v_isNoise is true).
-    static volatile uint8_t			  v_amp[Synth::numVoices];			    // 6-bit amplitude scale applied to each sample.
-    static volatile bool			    v_isNoise[Synth::numVoices];		  // If true, '_xor' is periodically overwritten with random values.
+    static volatile const int8_t*    v_wave[Synth::numVoices];         // Starting address of 256b wave table.
+    static volatile uint16_t         v_phase[Synth::numVoices];        // Phase accumulator holding the Q8.8 offset of the next sample.
+    static volatile uint16_t         v_interval[Synth::numVoices];     // Q8.8 sampling interval, used to advance the '_phase' accumulator.
+    static volatile int8_t           v_xor[Synth::numVoices];          // XOR bits applied to each sample (Note: clobbered if v_isNoise is true).
+    static volatile uint8_t          v_amp[Synth::numVoices];          // 6-bit amplitude scale applied to each sample.
+    static volatile bool             v_isNoise[Synth::numVoices];      // If true, '_xor' is periodically overwritten with random values.
 
-    static volatile Envelope			v_ampMod[Synth::numVoices];       // Amplitude modulation (0 .. 127, although most instruments peak below 96)
-    static volatile Envelope			v_freqMod[Synth::numVoices];		  // Frequency modulation (-64 .. +64)
-    static volatile Envelope			v_waveMod[Synth::numVoices];		  // Wave offset modulation (0 .. 127)
+    static volatile Envelope         v_ampMod[Synth::numVoices];       // Amplitude modulation (0 .. 127, although most instruments peak below 96)
+    static volatile Envelope         v_freqMod[Synth::numVoices];      // Frequency modulation (-64 .. +64)
+    static volatile Envelope         v_waveMod[Synth::numVoices];      // Wave offset modulation (0 .. 127)
 
-    static volatile uint8_t			  v_vol[Synth::numVoices];			    // 7-bit volume scalar (0 .. 127)
+    static volatile uint8_t          v_vol[Synth::numVoices];          // 7-bit volume scalar (0 .. 127)
 
-    static          uint16_t		  _baseInterval[Synth::numVoices];  // Original Q8.8 sampling internal, prior to modulation, pitch bend, etc.
-    static volatile uint16_t		  v_bentInterval[Synth::numVoices];	// Q8.8 sampling internal post pitch bend, but prior to freqMod.
-    static volatile const int8_t*	v_baseWave[Synth::numVoices];		  // Original starting address in wavetable.
-    static          uint8_t			  _note[Synth::numVoices];			    // Index of '_baseInternal' in the '_noteToSamplintInterval' table (for 'pitchBend()').
+    static          uint16_t         _baseInterval[Synth::numVoices];  // Original Q8.8 sampling internal, prior to modulation, pitch bend, etc.
+    static volatile uint16_t         v_bentInterval[Synth::numVoices]; // Q8.8 sampling internal post pitch bend, but prior to freqMod.
+    static volatile const int8_t*    v_baseWave[Synth::numVoices];     // Original starting address in wavetable.
+    static          uint8_t          _note[Synth::numVoices];          // Index of '_baseInternal' in the '_noteToSamplintInterval' table (for 'pitchBend()').
   
   public:
     void begin(){
@@ -117,7 +117,7 @@ class Synth {
       // Setup Timer2 for sample/mix/output ISR.
       TCCR2A = _BV(WGM21);                // CTC Mode (Clears timer and raises interrupt when OCR2B reaches OCR2A)
       TCCR2B = _BV(CS21);                 // Prescale None = C_FPU / 8 tick frequency
-      OCR2A  = samplingInterval;			    // Set timer top to sampling interval
+      OCR2A  = samplingInterval;          // Set timer top to sampling interval
       TIMSK2 = _BV(OCIE2A);               // Enable ISR
     }
   
@@ -129,7 +129,7 @@ class Synth {
       int8_t currentAmp;
     
       {
-        const volatile Envelope& currentMod	= v_ampMod[current];
+        const volatile Envelope& currentMod    = v_ampMod[current];
         currentStage = currentMod.stageIndex;
         currentAmp = currentMod.value;
       }
@@ -143,8 +143,8 @@ class Synth {
             const int8_t candidateAmp = candidateMod.value;   //   compare amplitudes to determine which voice to prefer.
           
             bool selectCandidate = candidateMod.slope >= 0    // If amplitude is increasing...
-              ? candidateAmp >= currentAmp							      //   prefer the lower amplitude voice
-              : candidateAmp <= currentAmp;							      //   otherwise the higher amplitude voice
+              ? candidateAmp >= currentAmp                    //   prefer the lower amplitude voice
+              : candidateAmp <= currentAmp;                   //   otherwise the higher amplitude voice
 
             if (selectCandidate) {
               current = candidate;
@@ -152,7 +152,7 @@ class Synth {
               currentAmp = candidateAmp;
             }
           } else {
-            current = candidate;										          // Else, if the candidate is in a later ADSR stage, prefer it.
+            current = candidate;                              // Else, if the candidate is in a later ADSR stage, prefer it.
             currentStage = candidateStage;
             currentAmp = candidateMod.value;
           }
@@ -284,7 +284,7 @@ class Synth {
         static uint8_t divider = 0;                       // Time division is used to spread lower-frequency / periodic work
         divider++;                                        // across interrupts.
       
-        const uint8_t voice = divider & 0x0F;				      // Bottom 4 bits of 'divider' selects which voice to perform work on.
+        const uint8_t voice = divider & 0x0F;             // Bottom 4 bits of 'divider' selects which voice to perform work on.
       
         if (v_isNoise[voice]) {                           // To avoid needing a large wavetable for noise, we use xor to combine
           v_xor[voice] = static_cast<uint8_t>(noise);     // the a 256B wavetable with samples from the LFSR.
@@ -292,13 +292,13 @@ class Synth {
 
         const uint8_t fn = divider & 0xF0;                // Top 4 bits of 'divider' selects which additional work to perform.
         switch (fn) {
-          case 0x00: {									                  // Advance frequency modulation and update 'v_pitch' for the current voice.
+          case 0x00: {                                    // Advance frequency modulation and update 'v_pitch' for the current voice.
             int8_t freqMod = (v_freqMod[voice].sample() - 0x40);
             v_interval[voice] = v_bentInterval[voice] + freqMod;
             break;
           }
         
-          case 0x50: {									                  // Advance wave modulation and update 'v_wave' for the current voice.
+          case 0x50: {                                    // Advance wave modulation and update 'v_wave' for the current voice.
             int8_t waveMod = (v_waveMod[voice].sample());
             v_wave[voice] = v_baseWave[voice] + waveMod;
             break;
@@ -396,10 +396,10 @@ volatile Envelope       Synth::v_waveMod[Synth::numVoices]      = {};
 
 volatile uint8_t        Synth::v_vol[Synth::numVoices]          = { 0 };
 
-         uint16_t		    Synth::_baseInterval[Synth::numVoices]	= { 0 };
-volatile uint16_t		    Synth::v_bentInterval[Synth::numVoices]	= { 0 };
-volatile const int8_t*  Synth::v_baseWave[Synth::numVoices]	    = { 0 };
-         uint8_t		    Synth::_note[Synth::numVoices]			    = { 0 };
+         uint16_t       Synth::_baseInterval[Synth::numVoices]  = { 0 };
+volatile uint16_t       Synth::v_bentInterval[Synth::numVoices] = { 0 };
+volatile const int8_t*  Synth::v_baseWave[Synth::numVoices]     = { 0 };
+         uint8_t        Synth::_note[Synth::numVoices]          = { 0 };
 
 SIGNAL(TIMER2_COMPA_vect) {
   Synth::isr();
