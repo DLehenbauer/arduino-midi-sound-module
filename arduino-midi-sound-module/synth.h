@@ -204,13 +204,13 @@ class Synth {
     }
 
     void noteOff(uint8_t voice) {
-      suspend();                                                    // Suspend audio processing before updating state shared with the ISR.
-      v_ampMod[voice].stop();                                       // Move amplitude envelope to 'release' stage, if not there already.
-      resume();                                                     // Resume audio processing.
+      suspend();                    // Suspend audio processing before updating state shared with the ISR.
+      v_ampMod[voice].stop();       // Move amplitude envelope to 'release' stage, if not there already.
+      resume();                     // Resume audio processing.
     }
 
-    // Update the current volume for the given voice.  Note that MidiSynth preprocesses both note velocity
-    // and channel volume into the single volume scalar.
+    // Update the current volume for the given voice.  Note that MidiSynth preprocesses both
+    // note velocity and channel volume into the single volume scalar.
     void setVolume(uint8_t voice, uint8_t volume) {
       // Suspend audio processing before updating state shared with the ISR.
       suspend();
@@ -275,7 +275,7 @@ class Synth {
   
     static uint16_t isr() __attribute__((always_inline)) {
       TIMSK2 = 0;         // Disable timer2 interrupts to prevent reentrancy.
-      sei();              // Re-enable interrupts to ensure USART RX ISR buffers incoming MIDI messages.
+      sei();              // Re-enable other interrupts to ensure USART RX ISR buffers incoming MIDI messages.
     
       {
         static uint16_t noise = 0xACE1;                   // 16-bit maximal-period Galois LFSR
@@ -353,7 +353,7 @@ class Synth {
     
       TIMSK2 = _BV(OCIE2A);                                               // Restore timer2 interrupts.
     
-      return (mix0to7 >> 1) + (mix8toF >> 1) + 0x8000;                    // For Emscripten, return as a single singned value (GCC/AVR will elide this code).
+      return (mix0to7 >> 1) + (mix8toF >> 1) + 0x8000;                    // For Emscripten, return as a single signed value (GCC/AVR will elide this code).
     }
 
   
