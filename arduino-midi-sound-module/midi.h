@@ -13,46 +13,38 @@
           // below #define to use standard MIDI speed of 31250 baud.
           #define USE_HAIRLESS_MIDI
 
-          You'll need to remove this to use options #1 or #3.          
+          You'll need to remove this to use options #1 or #3.
     
     Option #1: Hairless MIDI
     ------------------------
 
-    The easiest/fastest way to send MIDI data from your computer is to use a MIDI <-> Serial Bridge:
+    A software-only method to send MIDI data from your computer to the Arduino is to use a MIDI <-> Serial
+    bridge, like this one:
       http://projectgus.github.io/hairless-midiserial/
 
-    Note: You must configure both Hairless and the Arduino sketch to use 38400 (faster speeds will
-          overrun the incoming MIDI buffer).  Also see above note regarding configuring the baud
-          speed for the firmware.
+    NOTE: You must configure both Hairless and the Arduino sketch to use 38400 (faster speeds will
+          overrun the incoming MIDI buffer).
 
-    Option #2: 5-pin DIN
-    --------------------
+    NOTE: Remember to '#define USE_HAIRLESS_MIDI', per note at top.
 
-    You can add an 5-pin DIN serial MIDI input port to the Arduino and use a standard serial MIDI interface.
-    
-                220 
-        .------^v^v^----------o-------.                      .----o--------------o----< +5v
-        |                     |       |                      |    |              |
-        |     .-----.         |  1    |      .--------.      |   === 100nF       /
-        |    / 5-DIN \       _|_ N    o----1-|        |-6----'    |              \ 
-        |   |  (back) |       ^  9    o----2-| H11L1* |-5---------o--< Gnd       / 280
-        |   |o       o|      /_\ 1    |      |        |-4----.                   \
-        |    \ o o o /        |  4    |      '--------'      |                   /
-        |     /-----\         |       |                      |                   |
-        |  4 /       \ 5      |       |                      '-------------------o----> RX
-        '---'         '-------o-------'
-        
-    Notes:
-        * H11L1 is a PC900 equivalent
+    This will let you connect pipe MIDI devices connected to your computer out to the Arduino via USB.
 
-    Option #3: Mocolufa (requires ISP programmer)
+    If you want to pipe the output of a MIDI file player, you may need additionally ned a virtual MIDI
+    port.  On Windows, I use this one:
+      https://www.tobias-erichsen.de/software/loopmidi.html
+
+    Pipe your 
+
+    Option #2: USB MIDI (requires ISP programmer)
     ---------------------------------------------
 
-    If you have an ISP programmer and an Uno R3 w/ATMega82U, you can make your Arduino Uno appear
-    as a native USB MIDI device:
-      https://github.com/kuwatay/mocolufa
+    If you have an ISP programmer and an Uno R3 w/ATMega8U2 or ATMega16U2, you can make your Arduino Uno
+    appear as a native USB MIDI device:
+      https://github.com/TheKikGen/USBMidiKliK
 
-    When flashing the ATMega82U, the key on the ISP connector faces the pin sockets for [SCL..D8], which
+    NOTE: Remember to comment-out '#define USE_HAIRLESS_MIDI', per note at top.
+
+    When flashing the ATMega8U2, the key on the ISP connector faces the pin sockets for [SCL..D8], which
     can be a tight fit (on one Uno, I had to bend the ISP pins slightly from the header to make room for
     the key to fit.)
     
@@ -64,10 +56,12 @@
                                1   |o| GND
                                    |o| 13
     
-    After flashing 'mocolufa', the Arduino will appear as a 'arduino_midi' HID device.  To make the Arduino
-    appear as a serial COM device again, set a jumper across pins 2/4 and reconnect power:
+    After flashing 'USBMidiKliK', the Arduino will appear to your computer as a USB-MIDI device named
+    'USB MidiKliK Build-xxxx'.
     
-                                
+    To make the Arduino appear as a serial COM device again, set a jumper across pins 2/4 and reconnect
+    power:
+                                    
                             # o    .-.
                             # o    |o| SCL
                             o o    |o| SDA
@@ -113,7 +107,7 @@
         
     Installing new firmware:
     
-        > .\avrdude.exe -c usbtiny -P usb -p m16u2 -b 19200 -U flash:w:dualMoco.hex
+        > .\avrdude.exe -c usbtiny -P usb -p m16u2 -b 19200 -U flash:w:USBMidiKliK_dual_uno.hex.build:i
 
         avrdude.exe: AVR device initialized and ready to accept instructions
 
@@ -142,6 +136,28 @@
         avrdude.exe: safemode: Fuses OK (E:F4, H:D9, L:FF)
 
         avrdude.exe done.  Thank you.
+
+    Option #3: 5-pin DIN
+    --------------------
+
+    You can also build a 5-pin DIN serial MIDI input port for the Arduino and use a standard serial MIDI interface.
+
+    NOTE: Remember to comment-out '#define USE_HAIRLESS_MIDI', per note at top.
+    
+                220 
+        .------^v^v^----------o-------.                      .----o--------------o----< +5v
+        |                     |       |                      |    |              |
+        |     .-----.         |  1    |      .--------.      |   === 100nF       /
+        |    / 5-DIN \       _|_ N    o----1-|        |-6----'    |              \ 
+        |   |  (back) |       ^  9    o----2-| H11L1* |-5---------o--< Gnd       / 280
+        |   |o       o|      /_\ 1    |      |        |-4----.                   \
+        |    \ o o o /        |  4    |      '--------'      |                   /
+        |     /-----\         |       |                      |                   |
+        |  4 /       \ 5      |       |                      '-------------------o----> RX
+        '---'         '-------o-------'
+        
+    Notes:
+        * H11L1 is a PC900 equivalent
 */
 
 #ifndef __MIDI_H__
