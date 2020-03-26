@@ -207,6 +207,8 @@ class Midi final {
     static uint8_t midiDataRemaining;       // Expected number of data bytes remaining
     static uint8_t midiDataIndex;           // Location at which next data byte will be written
     static uint8_t midiData[maxMidiData];   // Buffer containing incoming data bytes
+    static uint16_t pendingBend[16];
+    static uint16_t pendingBendMask;
   
     static void dispatchCommand() {
       const uint8_t midiData0 = midiData[0];
@@ -219,7 +221,7 @@ class Midi final {
         case MidiStatus_NoteOn: {
           if (midiData[1] == 0) {
             noteOff(midiChannel, midiData0);
-            } else {
+          } else {
             noteOn(midiChannel, midiData0, midiData[1]);
           }
           break;
@@ -228,8 +230,13 @@ class Midi final {
           int16_t value = midiData[1];
           value <<= 7;
           value |= midiData0;
-          value -= 0x2000;
-          pitchBend(midiChannel, value);
+
+          // Pitch bends are expensive to process on the 328P due to the required S16 x U16 -> U32 multiplication.
+          // To avoid stalls during high frequency updates, we defer updating the channel's pitch until after we've
+          // drained the current queue of incoming messages.  (Note we also defer subtracting '0x2000' from 'value'.)
+          
+          pendingBend[midiChannel] = value;         // Record the desired pitch value
+          pendingBendMask |= (1 << midiChannel);    // Set a bit indicating that the channel has pending pitch bends
           break;
         }
         case MidiStatus_ControlChange: {
@@ -284,8 +291,8 @@ class Midi final {
         midiChannel = byte & 0x0F;
       } else {
         if (midiDataRemaining > 0) {                             // If more data bytes are expected for the current midi status
-          midiData[midiDataIndex++] = byte;                      //     then copy the next byte into the data buffer
-          midiDataRemaining--;                                   //       and decrement the remaining data bytes expected.
+          midiData[midiDataIndex++] = byte;                      //   then copy the next byte into the data buffer
+          midiDataRemaining--;                                   //   and decrement the remaining data bytes expected.
           if (midiDataRemaining == 0) {                          //   If this was the last data byte expected
             dispatchCommand();                                   //     then dispatch the current command.
           }
@@ -299,6 +306,13 @@ class Midi final {
       while (_midiBuffer.dequeue(received)) {
         decode(received);
       }
+
+      // Process any deferred pitch bends (see notes in `Midi::dispatchCommand()` above.)
+      for (int8_t midiChannel = 0; pendingBendMask; midiChannel++, pendingBendMask >>= 1) {   // While pitch bends remain, loop through channels 0..15
+        if (pendingBendMask & 0x01) {                                                         // If the current channel has a pending pitch bend
+          pitchBend(midiChannel, pendingBend[midiChannel] - 0x2000);                          //    apply it now.
+        }
+      }
     }
 };
 
@@ -307,6 +321,8 @@ uint8_t Midi::midiChannel = 0xFF;                     // Channel of the incoming
 uint8_t Midi::midiDataRemaining = 0;                  // Expected number of data bytes remaining
 uint8_t Midi::midiDataIndex = 0;                      // Location at which next data byte will be written
 uint8_t Midi::midiData[maxMidiData] = { 0 };          // Buffer containing incoming data bytes
+uint16_t Midi::pendingBend[16] = { 0 };
+uint16_t Midi::pendingBendMask = 0;
 constexpr int8_t Midi::midiStatusToDataLength[];
 RingBuffer<uint8_t, /* Log2Capacity: */ 6> Midi::_midiBuffer;
 

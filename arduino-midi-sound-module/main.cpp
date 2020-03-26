@@ -5,8 +5,8 @@
 
 /*
     Baseline:
-				Program Memory Usage 	:	22218 bytes   67.8 % Full
-				Data Memory Usage 		:	1052 bytes   51.4 % Full
+				Program Memory Usage 	:	22314 bytes   68.1 % Full
+				Data Memory Usage 		:	1086 bytes   53.0 % Full
 */
 
 #ifndef ARDUINO
