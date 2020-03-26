@@ -1,5 +1,5 @@
 ﻿/*
-    Main loop when compiling with Atmel Studio
+    Entry point when compiling with Atmel Studio
     https://github.com/DLehenbauer/arduino-midi-sound-module
 */
 
@@ -12,18 +12,9 @@
 #ifndef ARDUINO
 #ifndef __EMSCRIPTEN__
 
+// `main()` is defined in "main.h" so that it can be shared between the Atmel Studio entry
+// point ("main.cpp") and the Arduino IDE entry point ("arduino-midi-sound-module.ino").
 #include "main.h"
-
-// Note: See 'main.h' for definitions of 'setup()' and 'loop()'.
-int main() {
-  setup();
-  
-  while(true) {
-    loop();
-  }
-  
-  return 0;
-}
 
 #endif // !__EMSCRIPTEN__
 #endif // !ARDUINO

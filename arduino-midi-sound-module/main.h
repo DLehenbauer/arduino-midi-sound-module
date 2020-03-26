@@ -105,4 +105,15 @@ void loop() {
   }
 }
 
+// Note: Defining `main()` prevents initialization of the Arduino core runtime.
+int main() {
+  setup();
+  
+  while(true) {
+    loop();
+  }
+  
+  return 0;
+}
+
 #endif /* MAIN_H_ */

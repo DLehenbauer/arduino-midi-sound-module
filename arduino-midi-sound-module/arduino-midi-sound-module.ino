@@ -73,4 +73,5 @@
 // below #define to use standard MIDI speed of 31250 baud.
 #define USE_HAIRLESS_MIDI
 
+// See "main.h" for the definitions of `setup()` and `loop()`
 #include "main.h"
