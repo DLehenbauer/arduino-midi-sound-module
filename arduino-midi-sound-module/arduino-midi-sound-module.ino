@@ -1,5 +1,5 @@
 /*
-    Arduino Midi Synth v0.2
+    Arduino Midi Synth v0.2.2
     https://github.com/DLehenbauer/arduino-midi-sound-module
     
     This sketch turns an Arduino Uno into a 16-voice wavetable synthesizer functioning as a
@@ -40,7 +40,7 @@
 
                                                                                                          
       * Note: A/C coupling capacitor typically optional.  (Negative is on audio out side.)
-     ** Note: RC filtering capacitor can be adjusted to taste:
+     ** Note: RC filtering capacitor is optional and can be adjusted to taste:
      
                           8kHz      10kHz      30kHz
                2.2nf ~=  -0.7db    -1.1db     -5.6db
@@ -73,4 +73,5 @@
 // below #define to use standard MIDI speed of 31250 baud.
 #define USE_HAIRLESS_MIDI
 
+// See "main.h" for the definitions of `setup()` and `loop()`
 #include "main.h"

@@ -77,8 +77,11 @@ void display_send7(uint8_t mask) {
 //        b. Updating the bar graph on the OLED display with the current amplitude of each voice.
 //
 void loop() {
-  static uint8_t voice = 0;                   // Each time through the loop, we update the bar for one voice (in
-  voice++;                                    // round-robin order.)
+  Midi::dispatch();                           // Each time through the loop, we drain the circular buffor of pending MIDI
+                                              // messages.
+
+  static uint8_t voice = 0;                   // Each time through the loop, we alse update the amplitude bar for one voice
+  voice++;                                    // in round-robin order.
   voice &= 0x0F;
 
   uint8_t y = synth.getAmp(voice);            // The height of the bar is equal to 1.5x the current amplitude,
@@ -87,7 +90,6 @@ void loop() {
   
   const uint8_t x = voice << 3;               // Calculate the left edge of the bar from the voice index.
   const int8_t page = 7 - (y >> 3);           // Calculate the 8px page that contains 'y'.
-  Midi::dispatch();                           // (Drain the pending queue of MIDI messages)
   
   display.select(x, x + 6, 0, 7);             // Select the 7px x 64px area of the display containing the current bar.
    
@@ -103,6 +105,17 @@ void loop() {
   for (int8_t i = 6 - page; i >= 0; i--) {    // Set 7x8 blocks under the new bar graph's current level.
     display_send7(0xFF);
   }
+}
+
+// Note: Defining `main()` prevents initialization of the Arduino core runtime.
+int main() {
+  setup();
+  
+  while(true) {
+    loop();
+  }
+  
+  return 0;
 }
 
 #endif /* MAIN_H_ */
