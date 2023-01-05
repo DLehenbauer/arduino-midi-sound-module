@@ -3,6 +3,8 @@
     https://github.com/DLehenbauer/arduino-midi-sound-module
 
     Extends Synth with methods and required state for processing MIDI messages.
+    
+    NOT_TESTED_NOT_WORKING_CHANGES_STARTED_FOR_STEREO_PAN_INCOMPLETE_BROKEN_ETC
 */
 
 #ifndef __MIDISYNTH_H__
@@ -21,6 +23,8 @@ class MidiSynth final : public Synth {
     static uint8_t voiceToChannel[numVoices];                   // Map synth voice to the current MIDI channel (or 0xFF if off).
     static Instrument channelToInstrument[numMidiChannels];     // Map MIDI channel to the current MIDI program (i.e., instrument).
     static uint8_t channelToVolume[numMidiChannels];            // Map MIDI channel to the current 8-bit instrument volume.
+    static uint8_t channelToPan[numMidiChannels];               // Map MIDI channel to the current 8-bit pan volume.
+    static uint8_t channelToPanInv[numMidiChannels];            // Map MIDI channel to the current inverse of the 8-bit pan volume.
     static uint8_t voiceToVolume[numVoices];                    // Map synth voice to 8-bit volume scalar.
     static uint8_t voiceToVelocity[numVoices];                  // Map synth voice to 7-bit velocity scalar.
 
@@ -39,9 +43,9 @@ class MidiSynth final : public Synth {
 
       uint8_t voice = getNextVoice();                   // Find an available voice and play the note.
 
-      // Combine the incoming velocity with the current channel volume.
+      // Combine the incoming velocity with the current channel volume and pan scalar.
       voiceToVelocity[voice] = velocity;
-      uint8_t volume = mixVolume(channelToVolume[channel], velocity);
+      uint8_t volume = mixVolume(channelToVolume[channel], velocity, channelToPan[channel], channelToPanInv[channel]);
 
       noteOn(voice, note, volume, channelToInstrument[channel]);
 
@@ -58,7 +62,12 @@ class MidiSynth final : public Synth {
     }
 
     void midiProgramChange(uint8_t channel, uint8_t program) {
-      Instruments::getInstrument(program, channelToInstrument[channel]);        // Load the instrument corresponding to the given MIDI program
+        channelToPan[channel] = 0x80                                            // Most MIDI files seem to set the PAN shortly after setting the patch
+        channelToPanInv[channel] = 0x7F                                         // so we reset these values in case the new patch doesn't have PAN values
+
+        channelToVolume[channel] = 0xFF                                         // Same idea as above, probably unnecessary?
+
+        Instruments::getInstrument(program, channelToInstrument[channel]);      // Load the instrument corresponding to the given MIDI program
     }                                                                           // into the MIDI channel -> instrument map.
 
     void midiPitchBend(uint8_t channel, int16_t value) {
@@ -69,14 +78,27 @@ class MidiSynth final : public Synth {
       }
     }
 
-    // Combines the given channel volume and note velocity into a single volume for the
+    // Combines the given channel volume, note velocity, and pan scalar into a single volume for the
     // synth.  (Inputs and outputs are all 7 bit).
-    uint8_t mixVolume(uint8_t volume, uint8_t velocity) {
-      // Map 8-bit channel volume and 7-bit velocity to 7-bit total volume.  We've scaled MIDI
-      // channel volume up to 8-bit so that we can perform an inexpensive '>> 8'.
-      return (static_cast<uint16_t>(volume) * static_cast<uint16_t>(velocity)) >> 8;
+    uint8_t mixVolume(uint8_t volume, uint8_t velocity, uint8_t pan, uint8_t panInv) {
+     
+        uint8_t monoVolume = static_cast<uint16_t>(volume) * static_cast<uint16_t>(velocity) >> 8;
+            
+     // This is the configuration for the LEFT Arduino
+	        if (pan>128) {
+                uint8_t monoVolumeShifted = monoVolume << 1;
+                return (static_cast<uint16_t>(monoVolumeShifted) * static_cast<uint16_t>(panInv)) >> 8;
+
+     // This would be the configuration for the RIGHT Arduino
+     //     if (panInv>127) {
+     //         uint8_t monoVolumeShifted = monoVolume << 1;
+     //         return (static_cast<uint16_t>(monoVolumeShifted) * static_cast<uint16_t>(pan)) >> 8;
+                
+            } else {
+                return (monoVolume);
+                   }
     }
-  
+    
     void midiControlChange(uint8_t channel, uint8_t controller, uint8_t value) {
       switch (controller) {
         // Set channel volume
@@ -88,11 +110,26 @@ class MidiSynth final : public Synth {
           channelToVolume[channel] = value;
           for (int8_t voice = maxVoice; voice >= 0; voice--) {      // For each voice
             if (voiceToChannel[voice] == channel) {                 //   currently playing any note on this channel
-              // Combine the incoming channel volume with the current note velocity.
-              setVolume(voice, mixVolume(value, voiceToVelocity[voice]));
+              // Combine the incoming channel volume with the current note velocity and pan scalar.
+              setVolume(voice, mixVolume(value, voiceToVelocity[voice], channelToPan[channel], channelToPanInv[channel]));
             }
           }
           break;
+        }
+        
+        // Set channel pan (by adjusting volume)
+        case 0x0A: {
+            
+          value <<=1;
+          channelToPan[channel] = value;
+          channelToPanInv[channel] = ~value;
+            for (int8_t voice = maxVoice; voice >= 0; voice--) {        // For each voice
+                if (voiceToChannel[voice] == channel) {                 // currently playing any note on this channel
+                    // Combine the incoming pan volume with the current note velocity and channel volume.
+                  setVolume(voice, mixVolume(channelToVolume[channel], voiceToVelocity[voice], value, valueInverted));
+                }
+            }
+            break;
         }
         
         case 0x78: {
@@ -133,6 +170,8 @@ uint8_t     MidiSynth::voiceToNote[numVoices]               = { 0 };
 uint8_t     MidiSynth::voiceToChannel[numVoices]            = { 0 };
 Instrument  MidiSynth::channelToInstrument[numMidiChannels] = { 0 };
 uint8_t     MidiSynth::channelToVolume[numMidiChannels]     = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+uint8_t     MidiSynth::channelToPan[numMididChannels]       = { 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80 };
+uint8_t     MidiSynth::channelToPanInv[numMididChannels]    = { 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F };
 uint8_t     MidiSynth::voiceToVolume[numVoices]             = { 0 };
 uint8_t     MidiSynth::voiceToVelocity[numVoices]           = { 0 };
 
