@@ -5,11 +5,11 @@
 
 /*
     Baseline MONO:
-	Program Memory Usage:	22262 bytes   69 % Full
-	Data Memory Usage:	1084 bytes    52 % Full
+				Program Memory Usage 	:	22262 bytes   69 % Full
+				Data Memory Usage 		:	1084 bytes    52 % Full
     Baseline STEREO:
-	Program Memory Usage:	22526 bytes   69 % Full
-	Data Memory Usage:	1116 bytes    54 % Full
+				Program Memory Usage 	:	22526 bytes   69 % Full
+				Data Memory Usage 		:	1116 bytes    54 % Full
 */
 
 #ifndef ARDUINO
@@ -19,5 +19,5 @@
 // point ("main.cpp") and the Arduino IDE entry point ("arduino-midi-sound-module.ino").
 #include "main.h"
 
-#endif  // !__EMSCRIPTEN__
-#endif  // !ARDUINO
+#endif // !__EMSCRIPTEN__
+#endif // !ARDUINO
