@@ -71,7 +71,15 @@
 
 // Defining 'USE_HAIRLESS_MIDI' will set the serial baud rate to 38400.  Comment out the
 // below #define to use standard MIDI speed of 31250 baud.
-#define USE_HAIRLESS_MIDI
+
+// #define USE_HAIRLESS_MIDI
+
+// Set mono/stereo operation.  Comment out all the below #define comments to set mono
+// operation.  Defining STEREO and LEFT or RIGHT will enable stereo mode.
+
+// #define STEREO
+// #define LEFT
+// #define RIGHT
 
 // See "main.h" for the definitions of `setup()` and `loop()`
 #include "main.h"
